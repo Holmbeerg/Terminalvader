@@ -3,6 +3,40 @@ import time
 import argparse
 import ujson as json
 from datetime import timedelta, date, datetime
+from zoneinfo import ZoneInfo
+from tzlocal import get_localzone_name
+
+# https://opendata.smhi.se/apidocs/metfcst/index.html#about
+
+weather_descriptions = {
+    1: "Clear sky",
+    2: "Nearly clear sky",
+    3: "Variable cloudiness",
+    4: "Halfclear sky",
+    5: "Cloudy sky",
+    6: "Overcast",
+    7: "Fog",
+    8: "Light rain showers",
+    9: "Moderate rain showers",
+    10: "Heavy rain showers",
+    11: "Thunderstorm",
+    12: "Light sleet showers",
+    13: "Moderate sleet showers",
+    14: "Heavy sleet showers",
+    15: "Light snow showers",
+    16: "Moderate snow showers",
+    17: "Heavy snow showers",
+    18: "Light rain",
+    19: "Moderate rain",
+    20: "Heavy rain",
+    21: "Thunder",
+    22: "Light sleet",
+    23: "Moderate sleet",
+    24: "Heavy sleet",
+    25: "Light snowfall",
+    26: "Moderate snowfall",
+    27: "Heavy snowfall"
+}
 
 
 def fetch_weather(location):
@@ -39,25 +73,41 @@ def get_coordinates(location):
 
 def display_weather(weather_data, days):
     try:
-        end_date = datetime.today() + timedelta(int(days))
+        end_date = datetime.utcnow() + timedelta(int(days))
         timeseries = 0
         json_length = len(weather_data['timeSeries'])
+        local_timezone_name = get_localzone_name()
+        print(local_timezone_name)
+
         if weather_data:
             while timeseries < json_length:
                 timestamp_str = weather_data['timeSeries'][timeseries]['validTime']
                 timestamp = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
                 if timestamp <= end_date:
                     current_parameter = 0
+                    pmedian = None
+                    temperature = None
+                    wind_speed = None
+                    weather_code = None
                     while current_parameter < len(weather_data['timeSeries'][timeseries]['parameters']):
-                        if weather_data['timeSeries'][timeseries]['parameters'][current_parameter]['name'] == "t":
-                            temperature = weather_data['timeSeries'][timeseries]['parameters'][current_parameter]['values'][0]
-                            formatted_timestamp = timestamp.strftime("%m/%d %H:00")
-                            print(formatted_timestamp, f"{temperature}°C")
-                            break
+                        parameter = weather_data['timeSeries'][timeseries]['parameters'][current_parameter]
+                        if parameter['name'] == "t":
+                            temperature = parameter['values'][0]
+                        elif parameter['name'] == "ws":
+                            wind_speed = parameter['values'][0]
+                        elif parameter['name'] == "pmedian":
+                            pmedian = parameter['values'][0]
+                        elif parameter['name'] == "Wsymb2":
+                            weather_code = parameter['values'][0]
                         current_parameter += 1
-                    timeseries += 1
-                else:
-                    break
+
+                    local_timestamp = timestamp.astimezone(ZoneInfo(local_timezone_name))
+                    utc_offset = local_timestamp.utcoffset().total_seconds()/60/60
+                    adjusted_timestamp = local_timestamp + timedelta(hours=utc_offset)
+                    formatted_timestamp = adjusted_timestamp.strftime("%m/%d %H:00")
+                    weather_description = weather_descriptions.get(weather_code)
+                    print(formatted_timestamp + ", " f"{temperature}°C" + ", " + f"{wind_speed} m/s" + ", " + f"{pmedian}mm" + ", " + weather_description)
+                timeseries += 1
         else:
             print("No weather data available.")
     except Exception as e:
@@ -69,7 +119,6 @@ def main():
     parser.add_argument("city")
     parser.add_argument("days")
     args = parser.parse_args()
-
     location = args.city
     days = args.days
     coordinates = get_coordinates(location)
