@@ -4,6 +4,7 @@ import argparse
 import ujson as json
 from datetime import timedelta, date, datetime
 
+
 def fetch_weather(location):
     latitude, longitude = location
     url = f"https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/{longitude}/lat/{latitude}/data.json"
@@ -49,9 +50,9 @@ def display_weather(weather_data, days):
                     current_parameter = 0
                     while current_parameter < len(weather_data['timeSeries'][timeseries]['parameters']):
                         if weather_data['timeSeries'][timeseries]['parameters'][current_parameter]['name'] == "t":
-                            print(timestamp)
                             temperature = weather_data['timeSeries'][timeseries]['parameters'][current_parameter]['values'][0]
-                            print(f"{temperature}C")
+                            formatted_timestamp = timestamp.strftime("%m/%d %H:00")
+                            print(formatted_timestamp, f"{temperature}°C")
                             break
                         current_parameter += 1
                     timeseries += 1
