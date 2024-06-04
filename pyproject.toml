@@ -1,0 +1,3 @@
+[tool.poetry.scripts]
+smhi = "your_package.module:main_function" # Byt ut mot riktig namnet
+
