@@ -77,7 +77,7 @@ def display_weather(weather_data, days):
         timeseries = 0
         json_length = len(weather_data['timeSeries'])
         local_timezone_name = get_localzone_name()
-        print(local_timezone_name)
+        print("Timezone: " + local_timezone_name)
 
         if weather_data:
             while timeseries < json_length:
