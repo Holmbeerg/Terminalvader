@@ -4,6 +4,10 @@ setup(
     name="smhi",
     version='1.0',
     packages=find_packages(),
+    install_requires=[
+        'ujson',
+        'tzlocal'
+    ],
     entry_points = {
         'console_scripts': [
             'smhi = src.smhi:main',
