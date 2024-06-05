@@ -20,6 +20,12 @@ to my .bashrc, might have to do something similar on Mac or Windows if you don't
 
 ## USAGE
 
-First specify the location, for example the city, then the amount of days in the future you want to fetch weather data for.    
+First type smhi and then specify the location and lastly amount of days in the future you want to fetch weather data for.    
 
-![image](https://github.com/Holmbeerg/Terminalvader/assets/48940210/964226d6-b42a-4814-84b4-fb340af1e721)
+![image](https://github.com/Holmbeerg/Terminalvader/assets/48940210/964226d6-b42a-4814-84b4-fb340af1e721)  
+
+## TODO
+
+Add some more robust error handling, maybe improve the look
+
+
